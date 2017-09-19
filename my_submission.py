@@ -43,6 +43,21 @@ class PatternPosePopulation(population_search.Population):
         '''
  
         	# INSERT YOUR CODE HERE
+        height, width = self.distance_image.shape[:2]       
+        np.clip(self.W[:,0],0,width-1,self.W[:,0])
+        np.clip(self.W[:,1],0,height-1,self.W[:,1])
+        #self.C = self.distance_image[self.W[:,1].astype(int), self.W[:,0].astype(int)]
+        self.C = np.array([])
+        for pose in self.W:
+            score, Vp = self.pat.evaluate(self.distance_image,pose)
+            self.C = np.append(self.C, np.array([score]))
+        i_min = self.C.argmin()
+        cost_min = self.C[i_min]
+        if cost_min<self.best_cost:
+            self.best_w = self.W[i_min].copy()
+            self.best_cost = cost_min
+        return cost_min
+
 
     def mutate(self):
         '''
@@ -60,7 +75,9 @@ class PatternPosePopulation(population_search.Population):
         assert self.W.shape==(self.n,4)
 
         	# INSERT YOUR CODE HERE
-                
+        mutations = np.random.choice([-1,0,1], 4*self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,4)  
+        self.W = self.W+mutations
+    
     def set_distance_image(self, distance_image):
         self.distance_image = distance_image
 
