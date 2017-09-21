@@ -8,6 +8,8 @@ Created on Mon Sep 18 16:41:22 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
+import math
+
 import pattern_utils
 import population_search
 
@@ -61,38 +63,47 @@ def test_particle_filter_search():
 #    print(pose)       
 #
 #test_particle_filter_search()
+#
+#class Person(object):
+#    def __init__(self,name):
+#        self.name = name
+#    
+#    def printStuff(self):
+#        return self.name
+#
+#class Gary(Person):
+#    def __init__(self):
+#        name = "Gary"
+#        super().__init__(name)
+#        
+#G = Gary()
+#A = G.printStuff()
+#B = super(Gary,G).printStuff()
+#print(A)
+#print(B)
+#
+#imf, imd , pat_list, pose_list = pattern_utils.make_test_image_1(True)
+#ipat = 2 # index of the pattern to target
+#
+#pat = pat_list[ipat]
+#
+#C,Vp = pat.evaluate(imd,(100,30, np.pi/3,40))
+#
+#print(C)
+#print(Vp)
+#
+#W = np.array([1,2,3])
+#Y = np.array([4])
+#W = np.append(W,Y)
+#print(W)
 
-class Person(object):
-    def __init__(self,name):
-        self.name = name
-    
-    def printStuff(self):
-        return self.name
-
-class Gary(Person):
-    def __init__(self):
-        name = "Gary"
-        super().__init__(name)
+mutations = np.concatenate((
+        np.random.choice([-1,0,1], 3, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),
+        np.random.choice([-1,0,1], 3, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),
+        np.random.choice([-0.0174533,0,0.0174533], 3, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),  #0.0174533 is approximatly 1 degree in radians
+        np.random.choice([-1,0,1], 3, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1)
+            ), axis=1)
         
-G = Gary()
-A = G.printStuff()
-B = super(Gary,G).printStuff()
-print(A)
-print(B)
 
-imf, imd , pat_list, pose_list = pattern_utils.make_test_image_1(True)
-ipat = 2 # index of the pattern to target
-
-pat = pat_list[ipat]
-
-C,Vp = pat.evaluate(imd,(100,30, np.pi/3,40))
-
-print(C)
-print(Vp)
-
-W = np.array([1,2,3])
-Y = np.array([4])
-W = np.append(W,Y)
-print(W)
-
+print (mutations)
 

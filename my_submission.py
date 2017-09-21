@@ -74,8 +74,22 @@ class PatternPosePopulation(population_search.Population):
         
         assert self.W.shape==(self.n,4)
 
-        	# INSERT YOUR CODE HERE
-        mutations = np.random.choice([-1,0,1], 4*self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,4)  
+        	# INSERT YOUR CODE HERE        
+        
+        '''
+        mutations is a self.n by 4 matrix that can randomly have the values [-1,0,1] on the first, second and fourth coloums.
+        On the thrid coloum it can randomly have the values [-0.0174533,0,0.0174533] where 0.0174533 is equal to one degree 
+        in radians. The probability of it choosing any these values is 1/3 and so it has a uniform random distribution.
+        We then add the mutations matrix to the self.W matrix in order to mutate the valiables for the particle filter search.
+        
+        '''
+        mutations = np.concatenate((
+        np.random.choice([-1,0,1], self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),
+        np.random.choice([-1,0,1], self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),
+        np.random.choice([-0.0174533,0,0.0174533], self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1),  #0.0174533 is approximatly 1 degree in radians
+        np.random.choice([-1,0,1], self.n, replace=True, p = [1/3,1/3,1/3]).reshape(-1,1)
+            ), axis=1)
+        
         self.W = self.W+mutations
     
     def set_distance_image(self, distance_image):
@@ -99,7 +113,7 @@ def initial_population(region, scale = 10, pop_size=20):
     return W
 
 #------------------------------------------------------------------------------        
-def test_particle_filter_search():
+def test_particle_filter_search(pop_size = 50, iterations = 40): #Changed this line so that when we call the function we can also specify the popsize and interations 
     '''
     Run the particle filter search on test image 1 or image 2of the pattern_utils module
     
@@ -121,7 +135,7 @@ def test_particle_filter_search():
     region = (xs-20, xs+20, ys-20, ys+20)
     scale = pose_list[ipat][3]
         
-    pop_size=60
+
     W = initial_population(region, scale , pop_size)
     
     pop = PatternPosePopulation(W, pat)
@@ -129,7 +143,7 @@ def test_particle_filter_search():
     
     pop.temperature = 5
     
-    Lw, Lc = pop.particle_filter_search(40,log=True)
+    Lw, Lc = pop.particle_filter_search(iterations,log=True)
     
     plt.plot(Lc)
     plt.title('Cost vs generation index')
@@ -151,7 +165,7 @@ def test_particle_filter_search():
 #------------------------------------------------------------------------------        
 
 if __name__=='__main__':
-    test_particle_filter_search()
+    test_particle_filter_search(50,40)
     
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
