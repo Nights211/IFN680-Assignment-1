@@ -43,14 +43,29 @@ class PatternPosePopulation(population_search.Population):
         '''
  
         	# INSERT YOUR CODE HERE
+        '''
+        These 3 lines of code ensure that the position of the pattern remains inside the boundary of the distance image funciton.
+        '''
         height, width = self.distance_image.shape[:2]       
         np.clip(self.W[:,0],0,width-1,self.W[:,0])
         np.clip(self.W[:,1],0,height-1,self.W[:,1])
-        #self.C = self.distance_image[self.W[:,1].astype(int), self.W[:,0].astype(int)]
+        
+        '''
+        Here we are creating a cost array "self.C" and evaluating the cost of individual pose vectors "W[i,:]" by calling the evaluate 
+        function in the pattern_utils file. This evaluate function calulates the cost of a given pose vector by finding the average 
+        distance between a pixel on the indivual (The pattern created by the pose vector) and the edge pixel (The shapes in imf).
+        We store the cost of a pose vector W[i,:] into self.C[i]. 
+        '''
         self.C = np.array([])
         for pose in self.W:
             score, Vp = self.pat.evaluate(self.distance_image,pose)
             self.C = np.append(self.C, np.array([score]))
+            
+        '''
+        We now want to find the best cost of this generation "cost_min" and the best cost overall "self.best_cost" and the 
+        pose vector which has the best cost overall "self.best_w". To do this we find the smallest value in self.C and check 
+        if it is smaller than the best cost of previous generations and update the values if necessary. 
+        '''
         i_min = self.C.argmin()
         cost_min = self.C[i_min]
         if cost_min<self.best_cost:
@@ -113,7 +128,7 @@ def initial_population(region, scale = 10, pop_size=20):
     return W
 
 #------------------------------------------------------------------------------        
-def test_particle_filter_search(pop_size = 50, iterations = 40): #Changed this line so that when we call the function we can also specify the popsize and interations 
+def test_particle_filter_search():
     '''
     Run the particle filter search on test image 1 or image 2of the pattern_utils module
     
@@ -135,7 +150,59 @@ def test_particle_filter_search(pop_size = 50, iterations = 40): #Changed this l
     region = (xs-20, xs+20, ys-20, ys+20)
     scale = pose_list[ipat][3]
         
-
+    pop_size = 50
+    W = initial_population(region, scale , pop_size)
+    
+    pop = PatternPosePopulation(W, pat)
+    pop.set_distance_image(imd)
+    
+    pop.temperature = 5
+    
+    Lw, Lc = pop.particle_filter_search(40,log=True)
+    
+    plt.plot(Lc)
+    plt.title('Cost vs generation index')
+    plt.show()
+    
+    print(pop.best_w)
+    print(pop.best_cost)
+    
+        
+    pattern_utils.display_solution(pat_list, 
+                      pose_list, 
+                      pat,
+                      pop.best_w)
+                      
+    pattern_utils.replay_search(pat_list, 
+                      pose_list, 
+                      pat,
+                      Lw)      
+#------------------------------------------------------------------------------    
+    
+def ParticleFilterSearch_ExperimentalTests(pop_size = 50, iterations = 40): #Changed this line so that when we call the function we can also specify the popsize and interations 
+    '''
+    We created this function in order to be able to test the particle filter seach and find the experimental results.
+    This function is very similar to the test_particle_filter_search function with minor changes to make testing simpler.
+    
+    '''
+    
+    if True:
+        # use image 1
+        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_1(True)
+        ipat = 2 # index of the pattern to target
+    else:
+        # use image 2
+        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_2(True)
+        ipat = 0 # index of the pattern to target
+        
+    # Narrow the initial search region
+    pat = pat_list[ipat] #  (100,30, np.pi/3,40),
+    #    print(pat)
+    xs, ys = pose_list[ipat][:2]
+    region = (xs-20, xs+20, ys-20, ys+20)
+    scale = pose_list[ipat][3]
+        
+    
     W = initial_population(region, scale , pop_size)
     
     pop = PatternPosePopulation(W, pat)
@@ -165,7 +232,7 @@ def test_particle_filter_search(pop_size = 50, iterations = 40): #Changed this l
 #------------------------------------------------------------------------------        
 
 if __name__=='__main__':
-    test_particle_filter_search(50,40)
+    ParticleFilterSearch_ExperimentalTests(1000,3)
     
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
