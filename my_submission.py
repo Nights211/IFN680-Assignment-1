@@ -232,7 +232,18 @@ def ParticleFilterSearch_ExperimentalTests(pop_size = 50, iterations = 40): #Cha
 #------------------------------------------------------------------------------        
 
 if __name__=='__main__':
-    ParticleFilterSearch_ExperimentalTests(1000,3)
+    #ParticleFilterSearch_ExperimentalTests(1000,3)
+    best_cost = np.array([])
+    for counter in range(1,101):
+        best_cost =np.append(best_cost, ParticleFilterSearch_ExperimentalTests(100,100))
+        print(counter)
+    print(np.mean(best_cost))
+    
+    best_cost10 = np.array([])
+    for counter in range(1,101):
+        best_cost10 =np.append(best_cost10, ParticleFilterSearch_ExperimentalTests(10,1000))
+        print(counter)
+    print(np.mean(best_cost10))
     
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
