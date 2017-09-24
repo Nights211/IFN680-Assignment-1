@@ -4,13 +4,6 @@
 
 Instructions: 
     - You should implement the class PatternPosePopulation
-    
-Authors: Awal Singh, Ray Bastien, Frank Pham
-Date last modified: 24/9/2017
-Python Version: 3.6
-
-How to recreate the experimental results:
-    
 
 '''
 
@@ -73,6 +66,7 @@ class PatternPosePopulation(population_search.Population):
         pose vector which has the best cost overall "self.best_w". To do this we find the smallest value in self.C and check 
         if it is smaller than the best cost of previous generations and update the values if necessary. 
         '''
+#        self.best_cost = 50
         i_min = self.C.argmin()
         cost_min = self.C[i_min]
         if cost_min<self.best_cost:
@@ -175,37 +169,36 @@ def test_particle_filter_search():
     print(pop.best_cost)
     
         
-    pattern_utils.display_solution(pat_list, 
-                      pose_list, 
-                      pat,
-                      pop.best_w)
-                      
-    pattern_utils.replay_search(pat_list, 
-                      pose_list, 
-                      pat,
-                      Lw)      
+#    pattern_utils.display_solution(pat_list, 
+#                      pose_list, 
+#                      pat,
+#                      pop.best_w)
+#                      
+#    pattern_utils.replay_search(pat_list, 
+#                      pose_list, 
+#                      pat,
+#                      Lw)      
 #------------------------------------------------------------------------------    
     
-def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #Changed this line so that when we call the function we can also specify the popsize and interations 
+def ParticleFilterSearch_ExperimentalTests(pop_size = 50, iterations = 40): #Changed this line so that when we call the function we can also specify the popsize and interations 
     '''
-    We created this function in order to be able to test the particle filter search and find the experimental results.
-    This function is very similar to the test_particle_filter_search function with minor changes such as having the 
-    population sise and number of iterations as formal parameters.
+    We created this function in order to be able to test the particle filter seach and find the experimental results.
+    This function is very similar to the test_particle_filter_search function with minor changes to make testing simpler.
     
     '''
     
     if True:
         # use image 1
-        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_1(False)
+        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_1(True)
         ipat = 2 # index of the pattern to target
     else:
         # use image 2
-        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_2(False)
+        imf, imd , pat_list, pose_list = pattern_utils.make_test_image_2(True)
         ipat = 0 # index of the pattern to target
         
     # Narrow the initial search region
     pat = pat_list[ipat] #  (100,30, np.pi/3,40),
-    #    print(pat)
+#    print(pat)
     xs, ys = pose_list[ipat][:2]
     region = (xs-20, xs+20, ys-20, ys+20)
     scale = pose_list[ipat][3]
@@ -220,33 +213,39 @@ def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #Changed this 
     
     Lw, Lc = pop.particle_filter_search(iterations,log=True)
     
-    #plt.plot(Lc)
-    #plt.title('Cost vs generation index')
-    #plt.show()
+    plt.plot(Lc)
+    plt.title('Cost vs generation index')
+    plt.show()
     
-    return (pop.best_cost, pop.best_w)
-    
+    print(pop.best_w)
+    print(pop.best_cost)    
         
-    #pattern_utils.display_solution(pat_list, 
-    #                  pose_list, 
-    #                  pat,
-    #                  pop.best_w)
+    pattern_utils.display_solution(pat_list, 
+                      pose_list, 
+                      pat,
+                      pop.best_w)
                       
-    #pattern_utils.replay_search(pat_list, 
-    #                  pose_list, 
-    #                  pat,
-    #                  Lw)
-    
-def RunCombinations():
+#    pattern_utils.replay_search(pat_list, 
+#                      pose_list, 
+#                      pat,
+#                      Lw)
+#    
+    return (pop.best_cost, pop.best_w)
+#    return (pop.best_cost)
+#------------------------------------------------------------------------------        
+def RunCombination(popsize,iteration):
     combination = [
-                   [10000,1],#[5000,2],[2500,4],[2000,5],[1250,8],
-#                   [1000,10],[625,16],[500,20],[400,25],[250,40], 
+#            [10000,1],[5000,2],[2500,4],[2000,5],[1250,8],[1000,10],
+#                   [625,16],[500,20],[400,25],[250,40],
 #                   [200,50],[125,80],[100,100],[80,125],[50,200],
 #                   [40,250],[25,400],[20,500],[16,625],[10,1000],
-#                   [8,1250],[5,2000],[4,2500],[2,5000],[1,10000]
-                    ]
+#                   [8,1250],
+#                   [5,2000],
+#                   [4,2500],
+#                   [2,5000],
+                   [1,10000]]
     bestCosts = []
-    myFile = open('experiment.txt','w')       
+    myFile = open('experiment_cost_pose_last2.txt','w')       
     for comb in combination:
         popsize = comb[0]
         iteration = comb[1]
@@ -256,7 +255,7 @@ def RunCombinations():
             curCost , curPose = ParticleFilterSearch_ExperimentalTests(popsize,iteration)
             bestCosts.append(curCost)
             bestPoses.append(curPose)
-            print(str(i+1) + '-' + str(curCost))  #This is used for testing that the code is working.
+            print(str(i+1) + '-' + str(curCost))
     
         mean = np.mean(bestCosts)
         myFile.write("Pop: " + str(popsize) + " - Iter: " + str(iteration) + "\n")
@@ -264,17 +263,79 @@ def RunCombinations():
         for i in range(len(bestCosts)):
             myFile.write("C:" + str(bestCosts[i]) + " P:" + str(bestPoses[i]) + "\n")
         myFile.write("\n") 
-        bestCosts = np.reshape(bestCosts,(-1,1))            
+        bestCosts = np.reshape(bestCosts,(-1,1))
+        fig=plt.figure()
         plt.boxplot(bestCosts)
         plt.title('Best Cost vs Repetation Time | Pop: ' + str(popsize) + ' - Iter: ' + str(iteration) )        
-        plt.show()                      
+        plt.show() 
+        fig.savefig('boxplot_popsize'+str(popsize)+'_generation'+str(iteration)+'.png')                     
         print(mean)
     myFile.close()
+
 #------------------------------------------------------------------------------        
 
-if __name__=='__main__':
-    RunCombinations()
 
+if __name__=='__main__':
+    RunCombination(10000,1)
+#    ParticleFilterSearch_ExperimentalTests(1,10000)
+
+
+    
+#    dtype=np.float64
+#    best_cost = np.array([])
+#    best_cost_array = np.array([])
+#    best_pose_array = np.array([])
+#    cost_pose_array = np.array([])
+#    for counter in range(1,repeat):
+#        best_cost, best_pose = ParticleFilterSearch_ExperimentalTests(10000,1)
+##        best_cost_array = np.append(best_cost_array,best_cost)
+##        best_pose_array = np.append(best_pose_array,best_pose)
+#        cost_pose = [best_cost,best_pose]
+#        cost_pose_array = np.concatenate((cost_pose_array,cost_pose),axis=0)
+#
+#        print(counter, 'a')
+#    print(np.mean(best_cost))
+
+#    repeat = 100  
+#    best_cost10 = np.array([])
+#    for counter in range(1,repeat):
+#        best_cost10 =np.append(best_cost10, ParticleFilterSearch_ExperimentalTests(1,10000))
+#        print(counter, 'b')
+#    print(np.mean(best_cost10))
+#    
+#    best_cost100 = np.array([])
+#    for counter in range(1,repeat):
+#        best_cost100 =np.append(best_cost100, ParticleFilterSearch_ExperimentalTests(100,100))
+#        print(counter, 'c')
+#    print(np.mean(best_cost100))
+#    
+#    best_cost1000 = np.array([])
+#    for counter in range(1,repeat):
+#        best_cost1000 =np.append(best_cost1000, ParticleFilterSearch_ExperimentalTests(1000,10))
+#        print(counter, 'd')
+#    print(np.mean(best_cost1000))
+#    
+#    best_cost10000 = np.array([])
+#    for counter in range(1,repeat):
+#        best_cost10000 =np.append(best_cost10000, ParticleFilterSearch_ExperimentalTests(10000,1))
+#        print(counter, 'e')
+#    print(np.mean(best_cost10000))
+        
+#    ite = 5
+#    f = open('mean_bestcost.txt','w')
+#
+#    for exponent in range(1,4):
+#        cost_per_gen = 0
+#        cum_cost = 0
+#
+#        for counter in range(1, ite+1):
+#            cost_per_gen = ParticleFilterSearch_ExperimentalTests(int(10**exponent),int(10000/(10**exponent)))
+#            cum_cost +=cost_per_gen
+#            f.write(str(cost_per_gen) +'\n')
+#        f.write('population size =' +str(10**exponent)+ ' , generations = ' +str(10000/(10**exponent))+ ": " +str(cum_cost/ite) + '.\n\n')
+#    f.close() 
+
+    
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #                               CODE CEMETARY        
