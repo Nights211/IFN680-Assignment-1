@@ -191,16 +191,16 @@ def test_particle_filter_search():
                       Lw)      
 #------------------------------------------------------------------------------    
     
-def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #
+def ParticleFilterSearch_ExperimentalTests(pop_size, generations): #
     '''
     We created this function in order to be able to test the particle filter search and find the experimental results.
     This function is very similar to the "test_particle_filter_search" function with minor changes. These include having the 
-    population size and number of iterations as formal parameters, commenting out the uncessary code and returning the 
+    population size and number of generations as formal parameters, commenting out the uncessary code and returning the 
     pop.best_cost and pop.best_w variables.
     
     @param
         pop_size: The initial population size for the particle filter search
-        iterations: The number of iterations run in the particle filter search
+        generations: The number of generations run in the particle filter search
     
     @return
         pop.best_cost: The lowest cost found in the particle filter search
@@ -232,7 +232,7 @@ def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #
     
     pop.temperature = 5
     
-    Lw, Lc = pop.particle_filter_search(iterations,log=True)
+    Lw, Lc = pop.particle_filter_search(generations,log=True)
     
     #plt.plot(Lc)
     #plt.title('Cost vs generation index')
@@ -254,15 +254,15 @@ def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #
 def RunTestsForEachCombination(testsPerCombination = 100):
     '''
     This was the code used to find the experimental results for the assignment. Here we are running 100 tests for every possible
-    combination of initial population size and number of iterations. The variable "combinations" contains every two integers that
+    combination of initial population size and number of generations. The variable "combinations" contains every two integers that
     multiply to 10000 which was our chosen computational budget. We then run the "ParticleFilterSearch_ExperimentalTests" function
     100 times on each of these combinations and stored the best pose and its cost in a text file called "experiment.txt" for 
     each test. We also find the mean best cost for a given combination over the 100 tests, and create a box plot to display the
     costs in each test so we could visualise the varience in the data.
     
     Note: This function takes a long time to run and so it might be worth reducing the number of tests per combination or the total
-    number of combinations tested. We also found that some of the combinations with a particularly high number of iterations did
-    cause errors to occur when they were run. We suspect this has to do with the size of the pose shrinking each iteration until 
+    number of combinations tested. We also found that some of the combinations with a particularly high number of generations did
+    cause errors to occur when they were run. We suspect this has to do with the size of the pose shrinking each generation until 
     it became a degenerate point. Fortunatly this simply means that these combinations are not worth testing since the best pose
     they find are not very close to the correct pose they should find. 
     
@@ -281,25 +281,25 @@ def RunTestsForEachCombination(testsPerCombination = 100):
     bestCosts = []
     myFile = open('experiment.txt','w')       
     for comb in combinations:
-        popsize = comb[0]
-        iteration = comb[1]
+        pop_size = comb[0]
+        generations = comb[1]
         bestCosts = []
         bestPoses = []         
         for i in range(testsPerCombination):
-            curCost , curPose = ParticleFilterSearch_ExperimentalTests(popsize,iteration)
+            curCost , curPose = ParticleFilterSearch_ExperimentalTests(pop_size,generations)
             bestCosts.append(curCost)
             bestPoses.append(curPose)
             print(str(i+1) + '-' + str(curCost))  #This is used for testing that the code is working.
     
         mean = np.mean(bestCosts)
-        myFile.write("Pop: " + str(popsize) + " - Iter: " + str(iteration) + "\n")
+        myFile.write("Pop: " + str(pop_size) + " - Iter: " + str(generations) + "\n")
         myFile.write("Mean: " + str(mean) + "\n")        
         for i in range(len(bestCosts)):
             myFile.write("C:" + str(bestCosts[i]) + " P:" + str(bestPoses[i]) + "\n")
         myFile.write("\n") 
         bestCosts = np.reshape(bestCosts,(-1,1))            
         plt.boxplot(bestCosts)
-        plt.title('Best Costs | Pop: ' + str(popsize) + ' - Iter: ' + str(iteration) )        
+        plt.title('Best Costs | Pop: ' + str(pop_size) + ' - Iter: ' + str(generations) )        
         plt.show()                      
         print(mean)
     myFile.close()
