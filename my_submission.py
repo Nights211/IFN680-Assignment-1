@@ -191,12 +191,20 @@ def test_particle_filter_search():
                       Lw)      
 #------------------------------------------------------------------------------    
     
-def ParticleFilterSearch_ExperimentalTests(pop_size, iterations,): 
+def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #
     '''
     We created this function in order to be able to test the particle filter search and find the experimental results.
     This function is very similar to the "test_particle_filter_search" function with minor changes. These include having the 
     population size and number of iterations as formal parameters, commenting out the uncessary code and returning the 
     pop.best_cost and pop.best_w variables.
+    
+    @param
+        pop_size: The initial population size for the particle filter search
+        iterations: The number of iterations run in the particle filter search
+    
+    @return
+        pop.best_cost: The lowest cost found in the particle filter search
+        pop.best_w: The lowest cost pose found in the particle filter search
     
     '''
     
@@ -257,6 +265,9 @@ def RunTestsForEachCombination(testsPerCombination = 100):
     cause errors to occur when they were run. We suspect this has to do with the size of the pose shrinking each iteration until 
     it became a degenerate point. Fortunatly this simply means that these combinations are not worth testing since the best pose
     they find are not very close to the correct pose they should find. 
+    
+    @param
+        testsPerCombination: The number of tests run for a given combination
     
     '''    
 
