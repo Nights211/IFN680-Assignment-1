@@ -10,7 +10,12 @@ Date last modified: 24/9/2017
 Python Version: 3.6
 
 How to recreate the experimental results:
-    
+    Simply running this file will recreate the experimental results used in the report for image 1. However, this takes a very 
+    long time. Hence we would suggest looking at the "RunTestsForEachCombination" function and changing the testsPerCombination
+    variable when running this function to reduce the amount of tests that will be done. To recreate the tests for image 2 simply 
+    change the True to a False in the "if" statement in the "ParticleFilterSearch_ExperimentalTests" function. All of the code
+    from the original "my_submission.py" file that was provided still remains the only changes were completing the evaluate and
+    mutate and sections and adding two more functions to complete the experimental tests. 
 
 '''
 
@@ -51,7 +56,7 @@ class PatternPosePopulation(population_search.Population):
  
         	# INSERT YOUR CODE HERE
         '''
-        These 3 lines of code ensure that the position of the pattern remains inside the boundary of the distance image funciton.
+        These 3 lines of code ensure that the position of the pattern remains inside the boundary of the distance image.
         '''
         height, width = self.distance_image.shape[:2]       
         np.clip(self.W[:,0],0,width-1,self.W[:,0])
@@ -186,11 +191,12 @@ def test_particle_filter_search():
                       Lw)      
 #------------------------------------------------------------------------------    
     
-def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #Changed this line so that when we call the function we can also specify the popsize and interations 
+def ParticleFilterSearch_ExperimentalTests(pop_size, iterations,): 
     '''
     We created this function in order to be able to test the particle filter search and find the experimental results.
-    This function is very similar to the test_particle_filter_search function with minor changes such as having the 
-    population sise and number of iterations as formal parameters.
+    This function is very similar to the "test_particle_filter_search" function with minor changes. These include having the 
+    population size and number of iterations as formal parameters, commenting out the uncessary code and returning the 
+    pop.best_cost and pop.best_w variables.
     
     '''
     
@@ -237,22 +243,38 @@ def ParticleFilterSearch_ExperimentalTests(pop_size, iterations): #Changed this 
     #                  pat,
     #                  Lw)
     
-def RunCombinations():
-    combination = [
-                   [10000,1],#[5000,2],[2500,4],[2000,5],[1250,8],
-#                   [1000,10],[625,16],[500,20],[400,25],[250,40], 
-#                   [200,50],[125,80],[100,100],[80,125],[50,200],
-#                   [40,250],[25,400],[20,500],[16,625],[10,1000],
-#                   [8,1250],[5,2000],[4,2500],[2,5000],[1,10000]
+def RunTestsForEachCombination(testsPerCombination = 100):
+    '''
+    This was the code used to find the experimental results for the assignment. Here we are running 100 tests for every possible
+    combination of initial population size and number of iterations. The variable "combinations" contains every two integers that
+    multiply to 10000 which was our chosen computational budget. We then run the "ParticleFilterSearch_ExperimentalTests" function
+    100 times on each of these combinations and stored the best pose and its cost in a text file called "experiment.txt" for 
+    each test. We also find the mean best cost for a given combination over the 100 tests, and create a box plot to display the
+    costs in each test so we could visualise the varience in the data.
+    
+    Note: This function takes a long time to run and so it might be worth reducing the number of tests per combination or the total
+    number of combinations tested. We also found that some of the combinations with a particularly high number of iterations did
+    cause errors to occur when they were run. We suspect this has to do with the size of the pose shrinking each iteration until 
+    it became a degenerate point. Fortunatly this simply means that these combinations are not worth testing since the best pose
+    they find are not very close to the correct pose they should find. 
+    
+    '''    
+
+    combinations = [
+                   [10000,1],[5000,2],[2500,4],[2000,5],[1250,8],
+                   [1000,10],[625,16],[500,20],[400,25],[250,40], 
+                   [200,50],[125,80],[100,100],[80,125],[50,200],
+                   [40,250],[25,400],[20,500],[16,625],[10,1000],
+#                   [8,1250],[5,2000],[4,2500],[2,5000],[1,10000]  # These combinations often don't work.
                     ]
     bestCosts = []
     myFile = open('experiment.txt','w')       
-    for comb in combination:
+    for comb in combinations:
         popsize = comb[0]
         iteration = comb[1]
         bestCosts = []
         bestPoses = []         
-        for i in range(100):
+        for i in range(testsPerCombination):
             curCost , curPose = ParticleFilterSearch_ExperimentalTests(popsize,iteration)
             bestCosts.append(curCost)
             bestPoses.append(curPose)
@@ -266,14 +288,15 @@ def RunCombinations():
         myFile.write("\n") 
         bestCosts = np.reshape(bestCosts,(-1,1))            
         plt.boxplot(bestCosts)
-        plt.title('Best Cost vs Repetation Time | Pop: ' + str(popsize) + ' - Iter: ' + str(iteration) )        
+        plt.title('Best Costs | Pop: ' + str(popsize) + ' - Iter: ' + str(iteration) )        
         plt.show()                      
         print(mean)
     myFile.close()
 #------------------------------------------------------------------------------        
 
 if __name__=='__main__':
-    RunCombinations()
+    #test_particle_filter_search()
+    RunTestsForEachCombination()
 
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
