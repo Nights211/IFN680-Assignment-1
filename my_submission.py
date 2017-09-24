@@ -13,7 +13,7 @@ How to recreate the experimental results:
     Simply running this file will recreate the experimental results used in the report for image 1. However, this takes a very 
     long time. Hence we would suggest looking at the "RunTestsForEachCombination" function and changing the testsPerCombination
     variable when running this function to reduce the amount of tests that will be done. To recreate the tests for image 2 simply 
-    change the True to a False in the "if" statement in the "ParticleFilterSearch_ExperimentalTests" function. All of the code
+    change the True to a False for the "if" statement in the "ParticleFilterSearch_ExperimentalTests" function. All of the code
     from the original "my_submission.py" file that was provided still remains the only changes were completing the evaluate and
     mutate and sections and adding two more functions to complete the experimental tests. 
 
@@ -191,7 +191,7 @@ def test_particle_filter_search():
                       Lw)      
 #------------------------------------------------------------------------------    
     
-def ParticleFilterSearch_ExperimentalTests(pop_size, generations): #
+def ParticleFilterSearch_ExperimentalTests(pop_size, generations):
     '''
     We created this function in order to be able to test the particle filter search and find the experimental results.
     This function is very similar to the "test_particle_filter_search" function with minor changes. These include having the 
@@ -257,7 +257,7 @@ def RunTestsForEachCombination(testsPerCombination = 100):
     combination of initial population size and number of generations. The variable "combinations" contains every two integers that
     multiply to 10000 which was our chosen computational budget. We then run the "ParticleFilterSearch_ExperimentalTests" function
     100 times on each of these combinations and stored the best pose and its cost in a text file called "experiment.txt" for 
-    each test. We also find the mean best cost for a given combination over the 100 tests, and create a box plot to display the
+    each test. We also find the median best cost for a given combination over the 100 tests, and create a box plot to display the
     costs in each test so we could visualise the varience in the data.
     
     Note: This function takes a long time to run and so it might be worth reducing the number of tests per combination or the total
@@ -291,9 +291,9 @@ def RunTestsForEachCombination(testsPerCombination = 100):
             bestPoses.append(curPose)
             print(str(i+1) + '-' + str(curCost))  #This is used for testing that the code is working.
     
-        mean = np.mean(bestCosts)
-        myFile.write("Pop: " + str(pop_size) + " - Iter: " + str(generations) + "\n")
-        myFile.write("Mean: " + str(mean) + "\n")        
+        median = np.median(bestCosts)
+        myFile.write("Population: " + str(pop_size) + " - Generation: " + str(generations) + "\n")
+        myFile.write("Median: " + str(median) + "\n")        
         for i in range(len(bestCosts)):
             myFile.write("C:" + str(bestCosts[i]) + " P:" + str(bestPoses[i]) + "\n")
         myFile.write("\n") 
@@ -301,7 +301,7 @@ def RunTestsForEachCombination(testsPerCombination = 100):
         plt.boxplot(bestCosts)
         plt.title('Best Costs | Pop: ' + str(pop_size) + ' - Iter: ' + str(generations) )        
         plt.show()                      
-        print(mean)
+        print(median)
     myFile.close()
 #------------------------------------------------------------------------------        
 
